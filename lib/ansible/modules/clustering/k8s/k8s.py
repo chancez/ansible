@@ -63,7 +63,7 @@ options:
     description:
     - Whether to wait for certain resource kinds to end up in the desired state. By default the module exits once Kubernetes has
       received the request
-    - Implemented for C(state=present) for C(Deployment), C(DaemonSet) and C(Pod), and for C(state=absent) for all resource kinds.
+    - Implemented for C(state=present) for C(Deployment), C(StatefulSet), C(DaemonSet) and C(Pod), and for C(state=absent) for all resource kinds.
     - For resource kinds without an implementation, C(wait) returns immediately unless C(wait_condition) is set.
     default: no
     type: bool

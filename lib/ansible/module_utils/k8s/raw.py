@@ -418,6 +418,16 @@ class KubernetesRawModule(KubernetesAnsibleModule):
                     deployment.status.availableReplicas == deployment.status.replicas and
                     deployment.status.observedGeneration == deployment.metadata.generation)
 
+        def _statefulset_ready(ss):
+            # FIXME: frustratingly bool(ss.status) is True even if status is empty
+            # Furthermore ss.status.readyReplicas == deployment.status.replicas == None if status is empty
+            # Additionally, if replicas is 0, then we don't check for
+            # readyReplicas because it won't be set
+            return (ss.status and ss.status.replicas is not None and
+                    (ss.status.replicas == 0 or (ss.status.readyReplicas == ss.status.replicas and ss.status.updatedReplicas == ss.status.replicas)) and
+                    ss.status.observedGeneration == ss.metadata.generation and
+                    ss.status.updateRevision == ss.metadata.currentRevision)
+
         def _pod_ready(pod):
             return (pod.status and pod.status.containerStatuses is not None and
                     all([container.ready for container in pod.status.containerStatuses]))
@@ -454,6 +464,7 @@ class KubernetesRawModule(KubernetesAnsibleModule):
 
         waiter = dict(
             Deployment=_deployment_ready,
+            StatefulSet=_statefulset_ready,
             DaemonSet=_daemonset_ready,
             Pod=_pod_ready
         )
